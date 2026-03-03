@@ -35,80 +35,74 @@ const HeroCarousel = () => {
   };
 
   return (
-    <div className="relative h-screen w-full overflow-hidden">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentIndex}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.7 }}
-          className="absolute inset-0"
-        >
-          <img
-            src={images[currentIndex]}
-            alt={`Destino ${currentIndex + 1}`}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-black/40" />
-        </motion.div>
-      </AnimatePresence>
-
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-        <motion.h1
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
-          className="text-5xl md:text-7xl font-bold text-white mb-8"
-        >
-          Descubre Nuestros Destinos
-        </motion.h1>
-        <motion.div
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.8 }}
-        >
-          <Button
-            size="lg"
-            className="bg-secondary hover:bg-secondary/90 text-white font-bold text-lg px-8 py-6"
-            onClick={() => {
-              document.getElementById('destinos-nacionales')?.scrollIntoView({ behavior: 'smooth' });
-            }}
+    <div className="relative h-[600px] w-full rounded-3xl mt-8 px-12">
+      <div className="relative h-full overflow-hidden rounded-3xl">
+        <AnimatePresence>
+          <motion.div
+            key={currentIndex}
+            className="absolute inset-0"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
           >
-            Explorar Paquetes
-          </Button>
-        </motion.div>
-      </div>
+            <img
+              src={images[currentIndex]}
+              alt={`Destino ${currentIndex + 1}`}
+              className="w-full h-full object-cover"
+            />
+          </motion.div>
+        </AnimatePresence>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
 
-      <button
-        onClick={goToPrevious}
-        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white p-3 rounded-full transition-all"
-        aria-label="Previous slide"
-      >
-        <ChevronLeft className="w-6 h-6" />
-      </button>
+        <div className="absolute inset-0 flex flex-col items-start justify-end text-left pl-16 pr-8 pb-12">
+          <motion.h1
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+            className="text-5xl md:text-6xl font-bold text-white mb-4 max-w-md"
+          >
+            DESCUBRE<br /><span className="text-4xl md:text-5xl font-semibold">nuestros Destinos</span>
+          </motion.h1>
+          <motion.p
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+            className="text-lg md:text-xl text-white/90 mb-8 max-w-md"
+          >
+            Convierte tus sueños en viajes inolvidables y deja que el mundo sea tu próximo destino.
+          </motion.p>
+          <motion.div
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.7, duration: 0.8 }}
+          >
+            <Button
+              size="lg"
+              className="bg-pink-500 hover:bg-pink-600 text-white font-bold text-lg px-8 py-3 rounded-full"
+              onClick={() => {
+                document.getElementById('destinos-nacionales')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              Explora Paquetes
+            </Button>
+          </motion.div>
+        </div>
 
-      <button
-        onClick={goToNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white p-3 rounded-full transition-all"
-        aria-label="Next slide"
-      >
-        <ChevronRight className="w-6 h-6" />
-      </button>
-
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3">
-        {images.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToSlide(index)}
-            className={`w-3 h-3 rounded-full transition-all ${
-              index === currentIndex
-                ? 'bg-white w-8'
-                : 'bg-white/50 hover:bg-white/75'
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3">
+          {images.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={`w-2 h-2 rounded-full transition-all ${
+                index === currentIndex
+                  ? 'bg-white w-8'
+                  : 'bg-white/50 hover:bg-white/75'
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
