@@ -35,7 +35,7 @@ const HeroCarousel = () => {
   };
 
   return (
-    <div className="relative h-[600px] w-full rounded-3xl mt-8 px-12">
+    <div className="relative h-[400px] sm:h-[500px] md:h-[600px] w-full rounded-3xl mt-8 px-4 sm:px-8 md:px-12">
       <div className="relative h-full overflow-hidden rounded-3xl">
         <AnimatePresence>
           <motion.div
@@ -55,20 +55,20 @@ const HeroCarousel = () => {
         </AnimatePresence>
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
 
-        <div className="absolute inset-0 flex flex-col items-start justify-end text-left pl-16 pr-8 pb-12">
+        <div className="absolute inset-0 flex flex-col items-start justify-end text-left pl-6 sm:pl-8 md:pl-16 pr-4 sm:pr-6 md:pr-8 pb-8 sm:pb-10 md:pb-12">
           <motion.h1
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.8 }}
-            className="text-5xl md:text-6xl font-bold text-white mb-4 max-w-md"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 max-w-xs sm:max-w-md"
           >
-            DESCUBRE<br /><span className="text-4xl md:text-5xl font-semibold">nuestros Destinos</span>
+            DESCUBRE<br /><span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold">nuestros Destinos</span>
           </motion.h1>
           <motion.p
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.8 }}
-            className="text-lg md:text-xl text-white/90 mb-8 max-w-md"
+            className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 mb-6 sm:mb-8 max-w-xs sm:max-w-md"
           >
             Convierte tus sueños en viajes inolvidables y deja que el mundo sea tu próximo destino.
           </motion.p>
@@ -79,7 +79,7 @@ const HeroCarousel = () => {
           >
             <Button
               size="lg"
-              className="bg-pink-500 hover:bg-pink-600 text-white font-bold text-lg px-8 py-3 rounded-full"
+              className="bg-pink-500 hover:bg-pink-600 text-white font-bold text-sm sm:text-base md:text-lg px-6 sm:px-8 py-2 sm:py-3 rounded-full"
               onClick={() => {
                 document.getElementById('destinos-nacionales')?.scrollIntoView({ behavior: 'smooth' });
               }}
@@ -89,14 +89,14 @@ const HeroCarousel = () => {
           </motion.div>
         </div>
 
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3">
+        <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-3">
           {images.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
               className={`w-2 h-2 rounded-full transition-all ${
                 index === currentIndex
-                  ? 'bg-white w-8'
+                  ? 'bg-white w-6 sm:w-8'
                   : 'bg-white/50 hover:bg-white/75'
               }`}
               aria-label={`Go to slide ${index + 1}`}
