@@ -6,10 +6,10 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const HeroCarousel = () => {
   const images = [
-    'https://images.unsplash.com/photo-1654023316125-0c3cbae6ed0b',
-    'https://images.unsplash.com/photo-1556490042-e06478661fa0',
-    'https://images.unsplash.com/photo-1564932995457-e929308c67c3',
-    'https://images.unsplash.com/photo-1610885845692-9d4d879e905e'
+    'https://images.unsplash.com/photo-1654023316125-0c3cbae6ed0b?w=1920&h=1080&fit=crop&auto=format',
+    'https://images.unsplash.com/photo-1556490042-e06478661fa0?w=1920&h=1080&fit=crop&auto=format',
+    'https://images.unsplash.com/photo-1564932995457-e929308c67c3?w=1920&h=1080&fit=crop&auto=format',
+    'https://images.unsplash.com/photo-1610885845692-9d4d879e905e?w=1920&h=1080&fit=crop&auto=format'
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -50,6 +50,7 @@ const HeroCarousel = () => {
               src={images[currentIndex]}
               alt={`Destino ${currentIndex + 1}`}
               className="w-full h-full object-cover"
+              loading="lazy"
             />
           </motion.div>
         </AnimatePresence>

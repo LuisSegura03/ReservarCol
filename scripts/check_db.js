@@ -37,6 +37,6 @@
 
   } catch (err) {
     console.error('Script error:', err);
-    process.exit(1);
+    throw err;
   }
 })();

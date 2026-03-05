@@ -63,9 +63,10 @@ const DestinosNacionales = () => {
       try {
         const { data, error } = await supabase
           .from('plans')
-          .select('*, destination:destinations!inner(*)')
+          .select('id, name, price, duration_days, duration_nights, destination:destinations!inner(name, image_url, category)')
           .eq('destination.category', 'domestic')
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .limit(20);
 
         console.log('DestinosNacionales - initial query result', { data, error });
 
@@ -77,8 +78,9 @@ const DestinosNacionales = () => {
           try {
             const { data: allData, error: allError } = await supabase
               .from('plans')
-              .select('*, destination:destinations!inner(*)')
-              .order('created_at', { ascending: false });
+              .select('id, name, price, duration_days, duration_nights, destination:destinations!inner(name, image_url, category)')
+              .order('created_at', { ascending: false })
+              .limit(20);
             console.log('DestinosNacionales - fallback query result', { allData, allError });
             if (!allError && allData) {
               setDomesticPackages(allData.filter((pkg) => pkg.destination?.category === 'domestic'));
@@ -124,6 +126,7 @@ const DestinosNacionales = () => {
           src={pkg.destination?.image_url || 'https://images.unsplash.com/photo-1556490042-e06478661fa0'}
           alt={pkg.destination?.name || pkg.name}
           className="w-full h-full object-cover"
+          loading="lazy"
         />
         <div className="absolute inset-0 shadow-[inset_0_18px_22px_rgba(0,0,0,0.28)]" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent" />
