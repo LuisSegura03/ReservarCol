@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Globe, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import logo from '@/assets/Logo.png';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -58,9 +59,9 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 bg-white rounded-2xl mx-4 mt-4 px-6">
           <Link to="/" className="flex items-center w-50 gap-3">
-            <img 
-              src="/src/assets/logo.png" 
-              alt="Reservar Colombia Logo" 
+            <img
+              src={logo}
+              alt="Reservar Colombia Logo"
               className="w-36 h-36 mb-3 object-contain"
               onError={(e) => {
                 e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iMTIiIGZpbGw9IiNGRjcwNDMiLz4KPHR5cGUNCg0KCQkJCQkJCQkJCQkJaWQ9dDpkZWZhdWx0DQoJCQkJCQkJCQkJCWZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiINCgkJCQkJCQkJCQkJZm9udC1zaXplPSIxMiINCgkJCQkJCQkJCQkJZmlsbD0id2hpdGUiDQoJCQkJCQkJCQkJCQl0ZXh0LWFuY2hvcj0ibWlkZGxlIg0KCQkJCQkJCQkJCQkJZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+UkM8L3RleHQ+Cjwvc3ZnPgo=';
