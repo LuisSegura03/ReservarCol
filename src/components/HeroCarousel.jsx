@@ -50,7 +50,8 @@ const HeroCarousel = () => {
               src={images[currentIndex]}
               alt={`Destino ${currentIndex + 1}`}
               className="w-full h-full object-cover"
-              loading="lazy"
+              loading={currentIndex === 0 ? "eager" : "lazy"}
+          
             />
           </motion.div>
         </AnimatePresence>

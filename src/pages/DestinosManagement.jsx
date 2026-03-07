@@ -143,7 +143,7 @@ const DestinosManagement = () => {
                     </TableCell>
                     <TableCell className="text-right space-x-2">
                       <Button variant="ghost" size="icon" onClick={() => handleOpenModal(d)}>
-                        <Edit className="w-4 h-4 text-blue-500" />
+                        <Edit className="w-4 h-4 text-[#0d9488]" />
                       </Button>
                       {user?.role === 'Admin' && (
                         <Button variant="ghost" size="icon" onClick={() => handleDelete(d.id)}>
