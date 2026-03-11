@@ -3,8 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Check, X } from 'lucide-react';
+import { ArrowLeft, Check, X, Plus, Minus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -18,6 +20,21 @@ const PackageDetailPage = () => {
   const [pkg, setPkg] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [form, setForm] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    email: '',
+    passengers: 1,
+  });
+  const [errors, setErrors] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    email: '',
+    passengers: '',
+  });
 
   useEffect(() => {
     const fetchPlan = async () => {
@@ -52,9 +69,72 @@ const PackageDetailPage = () => {
   }, [id]);
 
   const handleSelectPlan = () => {
+    setIsSheetOpen(true);
+  };
+
+  const parsePrice = (value) => {
+    if (typeof value === 'number') return value;
+    if (!value) return 0;
+    const cleaned = String(value).replace(/\./g, '').replace(/,/g, '.');
+    const n = Number(cleaned);
+    return isNaN(n) ? 0 : n;
+  };
+
+  const formatPrice = (value, currency) => {
+    const n = parsePrice(value);
+    if (currency === 'COP') return `$${n.toLocaleString('es-CO')} COP`;
+    return `$${n.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${currency || ''}`;
+  };
+
+  const unitPrice = parsePrice(pkg?.price);
+  const totalPrice = unitPrice * (Number(form.passengers) || 1);
+
+  const validateField = (field, value) => {
+    switch (field) {
+      case 'firstName':
+      case 'lastName':
+        return value && String(value).trim().length > 0 ? '' : 'Este campo es obligatorio';
+      case 'email': {
+        const v = String(value || '').trim();
+        const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+        return ok ? '' : 'Correo inválido';
+      }
+      case 'phone': {
+        const v = String(value || '').trim();
+        const ok = v.length >= 7; // simple length check
+        return ok ? '' : 'Teléfono inválido';
+      }
+      case 'passengers': {
+        const n = Number(value || 0);
+        return n >= 1 ? '' : 'Al menos 1 pasajero';
+      }
+      default:
+        return '';
+    }
+  };
+
+  const handleFormChange = (field, val) => {
+    const newVal = field === 'passengers' ? Math.max(1, Number(val || 1)) : val;
+    const newForm = { ...form, [field]: newVal };
+    setForm(newForm);
+    // validate this field
+    setErrors(prev => ({ ...prev, [field]: validateField(field, newVal) }));
+  };
+
+  const validateForm = () => {
+    const nextErrors = {};
+    Object.keys(form).forEach((k) => {
+      nextErrors[k] = validateField(k, form[k]);
+    });
+    setErrors(nextErrors);
+    return !Object.values(nextErrors).some(Boolean);
+  };
+
+  const handlePay = () => {
     toast({
-      title: "¡Funcionalidad en desarrollo! 🚧",
-      description: "Esta característica estará disponible pronto. Por favor, contacta con nosotros para reservar.",
+      title: 'Funcionalidad en desarrollo',
+      description: 'El pago aún no está habilitado en esta versión.',
+      variant: 'destructive'
     });
   };
   
@@ -83,7 +163,7 @@ const PackageDetailPage = () => {
         <title>{pkg.name} - Reservar Colombia</title>
         <meta
           name="description"
-          content={`Descubre nuestro paquete a ${pkg.name} - ${pkg.duration}. ${pkg.currency === 'COP' ? `Desde $${pkg.price} COP` : `Desde $${pkg.price} USD`} por persona.`}
+          content={`Descubre nuestro paquete a ${pkg.name} - ${pkg.duration}. ${pkg.currency === 'COP' ? `Desde ${formatPrice(pkg.price, pkg.currency)}` : `Desde ${formatPrice(pkg.price, pkg.currency)}`} por persona.`}
         />
       </Helmet>
 
@@ -177,7 +257,7 @@ const PackageDetailPage = () => {
               <Card className="sticky top-24 shadow-xl">
                 <CardHeader className="bg-primary text-white rounded-t-lg">
                   <CardTitle className="text-3xl font-bold">
-                    {pkg.currency === 'COP' ? `$${pkg.price} COP` : `$${pkg.price} USD`}
+                    {formatPrice(pkg.price, pkg.currency)}
                   </CardTitle>
                   <p className="text-white/90">Por persona en acomodación doble</p>
                 </CardHeader>
@@ -206,6 +286,106 @@ const PackageDetailPage = () => {
         </div>
 
         <Footer />
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+          <SheetContent side="right" className="max-w-md">
+            <SheetHeader>
+              <SheetTitle>Reservar — {pkg.destination?.name || pkg.name}</SheetTitle>
+            </SheetHeader>
+
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm text-muted-foreground">Nombre</label>
+                <Input value={form.firstName} onChange={e => handleFormChange('firstName', e.target.value)} placeholder="Nombre" />
+                {errors.firstName && <p className="text-red-600 text-sm mt-1">{errors.firstName}</p>}
+              </div>
+
+              <div>
+                <label className="text-sm text-muted-foreground">Apellido</label>
+                <Input value={form.lastName} onChange={e => handleFormChange('lastName', e.target.value)} placeholder="Apellido" />
+                {errors.lastName && <p className="text-red-600 text-sm mt-1">{errors.lastName}</p>}
+              </div>
+
+              <div>
+                <label className="text-sm text-muted-foreground">Teléfono</label>
+                <Input
+                  value={form.phone}
+                  onChange={e => handleFormChange('phone', (e.target.value || '').toString().replace(/\D/g, ''))}
+                  onPaste={(e) => {
+                    const pasted = (e.clipboardData || window.clipboardData).getData('text') || '';
+                    const digits = pasted.replace(/\D/g, '');
+                    e.preventDefault();
+                    handleFormChange('phone', digits);
+                  }}
+                  placeholder="3000000000"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                />
+                {errors.phone && <p className="text-red-600 text-sm mt-1">{errors.phone}</p>}
+              </div>
+
+              <div>
+                <label className="text-sm text-muted-foreground">Correo electrónico</label>
+                <Input value={form.email} onChange={e => handleFormChange('email', e.target.value)} placeholder="correo@ejemplo.com" type="email" />
+                {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
+              </div>
+
+              <div>
+                <label className="text-sm text-muted-foreground mb-2 block">Cantidad de personas</label>
+                <div className="inline-flex items-center rounded-md border bg-white">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleFormChange('passengers', Math.max(1, Number(form.passengers) - 1))}
+                    aria-label="Disminuir pasajeros"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </Button>
+                  <div className="px-4 py-2 min-w-[56px] text-center font-semibold">{form.passengers}</div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleFormChange('passengers', Number(form.passengers) + 1)}
+                    aria-label="Aumentar pasajeros"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t">
+                <div className="flex justify-between items-center">
+                  <div className="text-sm text-muted-foreground">Precio por persona</div>
+                  <div className="font-semibold">{formatPrice(unitPrice, pkg.currency)}</div>
+                </div>
+                <div className="flex justify-between items-center mt-2">
+                  <div className="text-sm text-muted-foreground">Total ({form.passengers} pax)</div>
+                  <div className="text-xl font-bold">{formatPrice(totalPrice, pkg.currency)}</div>
+                </div>
+              </div>
+            </div>
+
+            <SheetFooter>
+              <div className="w-full flex gap-2">
+                <Button variant="outline" className="flex-1" onClick={() => setIsSheetOpen(false)}>Cancelar</Button>
+                {/** disable pay if form invalid or missing required fields */}
+                <Button
+                  className="flex-1 bg-primary text-white"
+                  onClick={() => {
+                    const ok = validateForm();
+                    if (!ok) {
+                      toast({ title: 'Corrige los errores', description: 'Por favor completa correctamente el formulario.', variant: 'destructive' });
+                      return;
+                    }
+                    handlePay();
+                  }}
+                  disabled={Object.values(errors).some(Boolean) || !form.firstName || !form.lastName || !form.email}
+                >
+                  Pagar
+                </Button>
+              </div>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
       </div>
     </>
   );

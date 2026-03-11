@@ -89,33 +89,6 @@ const DestinosInternacionales = () => {
   }, []);
 
   useEffect(() => {
-    if (!isPriceOpen && !isDaysOpen) return;
-
-    const onKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        setIsPriceOpen(false);
-        setIsDaysOpen(false);
-      }
-    };
-
-    const onPointerDown = (e) => {
-      const target = e.target;
-      if (!(target instanceof Element)) return;
-      if (target.closest('[data-price-dropdown]')) return;
-      if (target.closest('[data-days-dropdown]')) return;
-      setIsPriceOpen(false);
-      setIsDaysOpen(false);
-    };
-
-    window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('pointerdown', onPointerDown);
-    return () => {
-      window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('pointerdown', onPointerDown);
-    };
-  }, [isPriceOpen, isDaysOpen]);
-
-  useEffect(() => {
     fetchPlans();
 
     const channel = supabase
@@ -191,7 +164,7 @@ const DestinosInternacionales = () => {
         </div>
 
         <div className="text-2xl font-semibold text-white mt-2">
-          {pkg.price ? pkg.price.toLocaleString("es-CO") : "0"} COP
+          {Number(pkg.price ?? 0).toLocaleString('es-CO')} COP
         </div>
 
         <div className="text-sm text-white/80 mt-2 flex gap-4">
@@ -253,122 +226,25 @@ const DestinosInternacionales = () => {
   /* ============================= */
 
   return (
-    <section className="py-16 bg-emerald-50/40">
+    <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
 
         <h2 className="text-4xl font-bold text-center mb-8">
           Destinos Internacionales
         </h2>
-        <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-          Conoce nuestros destinos y paquetes a nivel internacional
-        </p>
 
-        {/* Search and Filters */}
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-12">
-          <div className="relative flex items-center w-full md:w-1/3">
+        {/* Search */}
+
+        <div className="flex justify-center mb-10">
+          <div className="relative w-full md:w-1/3">
             <input
               type="text"
-              placeholder="Busca tu Destino"
-              value={searchTerm}
+              placeholder="Busca tu destino"
               onChange={(e) => handleSearch(e.target.value)}
-              className="w-full p-3 pl-4 pr-12 rounded-full border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full p-3 pl-4 pr-12 rounded-full border"
             />
-            <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-teal-600 text-white p-2 rounded-full hover:bg-teal-700 transition-colors">
-              <Search className="h-5 w-5" />
-            </button>
-          </div>
 
-          <div className="relative w-full md:w-auto" data-days-dropdown>
-            <button
-              type="button"
-              onClick={() => setIsDaysOpen((v) => !v)}
-              className="w-full md:w-[150px] bg-teal-600 text-white py-3 px-4 rounded-full flex items-center justify-between gap-3 hover:bg-teal-700 transition-colors"
-            >
-              <span className="flex items-center gap-2">
-                <CalendarDays className="w-4 h-4" />
-                {selectedDays == null ? 'Días' : `${selectedDays} Días`}
-              </span>
-              <ChevronDown className={`w-4 h-4 transition-transform ${isDaysOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            <div
-              className={`absolute right-0 mt-3 w-full md:w-[260px] bg-white border border-gray-200 shadow-xl rounded-2xl p-4 z-10 origin-top transition-all duration-200 ${
-                isDaysOpen
-                  ? 'opacity-100 translate-y-0 pointer-events-auto'
-                  : 'opacity-0 -translate-y-2 pointer-events-none'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-sm font-medium text-gray-700">Días</div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedDays(null)}
-                  className="text-sm text-gray-500 hover:text-gray-700"
-                >
-                  Limpiar
-                </button>
-              </div>
-              <input
-                type="range"
-                min={1}
-                max={30}
-                step={1}
-                value={selectedDays ?? 2}
-                onChange={(e) => setSelectedDays(Number(e.target.value))}
-                className="w-full accent-teal-600"
-              />
-              <div className="mt-3 text-sm text-gray-600">
-                Seleccionado: <span className="font-semibold">{selectedDays ?? 2} días</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative w-full md:w-auto" data-price-dropdown>
-            <button
-              type="button"
-              onClick={() => setIsPriceOpen((v) => !v)}
-              className="w-full md:w-[190px] bg-teal-600 text-white py-3 px-4 rounded-full flex items-center justify-between gap-3 hover:bg-teal-700 transition-colors"
-            >
-              <span className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4" />
-                {maxPrice.toLocaleString('es-CO')}
-              </span>
-              <ChevronDown className={`w-4 h-4 transition-transform ${isPriceOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            <div
-              className={`absolute right-0 mt-3 w-full md:w-[260px] bg-white border border-gray-200 shadow-xl rounded-2xl p-4 z-10 origin-top transition-all duration-200 ${
-                isPriceOpen
-                  ? 'opacity-100 translate-y-0 pointer-events-auto'
-                  : 'opacity-0 -translate-y-2 pointer-events-none'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-sm font-medium text-gray-700">Precio máximo</div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMaxPrice(5000000);
-                    setIsPriceOpen(false);
-                  }}
-                  className="text-sm text-gray-500 hover:text-gray-700"
-                >
-                  Limpiar
-                </button>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={10000000}
-                step={100000}
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(Number(e.target.value))}
-                className="w-full accent-teal-600"
-              />
-              <div className="mt-3 text-sm text-gray-600">
-                Hasta: <span className="font-semibold">${maxPrice.toLocaleString('es-CO')}</span>
-              </div>
-            </div>
+            <Search className="absolute right-4 top-3 w-5 h-5 text-gray-400" />
           </div>
         </div>
 
@@ -379,18 +255,15 @@ const DestinosInternacionales = () => {
             <div className="animate-spin h-10 w-10 border-b-2 border-teal-600 rounded-full"></div>
           </div>
         ) : filteredPackages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-center min-h-[260px]">
-            <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-6">
-              <Plane className="w-10 h-10 text-gray-400" />
-            </div>
-            <div className="text-2xl font-bold text-gray-800">No se encontraron resultados</div>
-            <div className="text-gray-500 mt-2 max-w-md">
-              Intenta con otro destino o ajusta los filtros para ver más opciones.
-            </div>
+          <div className="text-center py-20">
+            <Plane className="mx-auto w-12 h-12 text-gray-400 mb-4" />
+            <p className="text-gray-500">
+              No se encontraron resultados
+            </p>
+
             <Button
-              type="button"
               onClick={resetFilters}
-              className="mt-6 rounded-full bg-teal-600 hover:bg-teal-700 text-white px-8"
+              className="mt-6 bg-teal-600 hover:bg-teal-700"
             >
               Buscar de nuevo
             </Button>
