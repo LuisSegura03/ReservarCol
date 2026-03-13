@@ -5,7 +5,7 @@ import { Facebook, Instagram, Mail, MessageCircle, MapPin, Phone } from 'lucide-
 
 const Footer = () => {
   return (
-    <footer id="contacto" className="bg-primary text-white py-12 relative">
+    <footer id="contacto" className="bg-primary text-white py-12 relative bg-[#0d9488]">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           <div>

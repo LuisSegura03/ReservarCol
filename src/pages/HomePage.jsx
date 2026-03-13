@@ -18,7 +18,7 @@ const HomePage = () => {
         />
       </Helmet>
 
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-screen bg-background flex flex-col pt-16">
         <Header />
         <main className="flex-1">
           <HeroCarousel />
