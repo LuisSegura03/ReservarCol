@@ -1,18 +1,18 @@
 
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import { useAdminContext } from '@/context/AdminContext';
 import { LayoutDashboard, Map, Briefcase, Inbox, Settings, LogOut, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const AdminLayout = ({ children }) => {
-  
+  const { user, logout } = useAdminContext();
   const navigate = useNavigate();
   const location = useLocation();
-  const { adminSignOut , user} = useAdminAuth();
+
   const handleLogout = () => {
-    adminSignOut();
+    logout();
     navigate('/admin');
   };
 

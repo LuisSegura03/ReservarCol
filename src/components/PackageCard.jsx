@@ -16,6 +16,12 @@ const PackageCard = ({ package: pkg, onClick }) => {
     { icon: Shield, label: 'Seguro' }
   ];
 
+  const formatPrice = (value, currency) => {
+    const n = Number(value ?? 0);
+    if (currency === 'COP') return `$${n.toLocaleString('es-CO')} COP`;
+    return `$${n.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${currency || ''}`;
+  };
+
   return (
     <motion.div
       whileHover={{ scale: 1.03 }}
@@ -45,7 +51,7 @@ const PackageCard = ({ package: pkg, onClick }) => {
           <div className="space-y-2">
             <p className="text-sm text-white/90">{pkg.duration}</p>
             <p className="text-2xl font-bold text-white">
-              {pkg.currency === 'COP' ? `$${pkg.price} COP` : `$${pkg.price} USD`}
+              {formatPrice(pkg.price, pkg.currency)}
             </p>
             <p className="text-xs text-white/80">Por persona en acomodación doble</p>
           </div>
