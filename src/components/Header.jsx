@@ -41,7 +41,8 @@ const Header = () => {
     { name: 'Inicio', href: '/' },
     { name: 'Destinos Nacionales', href: '#destinos-nacionales' },
     { name: 'Destinos Internacionales', href: '#destinos-internacionales' },
-    { name: 'Contacto', href: '#contacto' }
+    { name: 'Contacto', href: '#contacto' },
+    { name: 'Visas', href: 'https://visascolombia.reservarcolombia.com/' }
   ];
 
   const handleNavClick = (href) => {
@@ -70,7 +71,7 @@ const Header = () => {
           </Link>
 
           <nav className="hidden md:flex items-center justify-center flex-1 gap-12">
-            {navLinks.slice(0, 3).map((link) => (
+            {navLinks.map((link) => (
               link.href.startsWith('#') ? (
                 <button
                   key={link.name}
@@ -99,7 +100,7 @@ const Header = () => {
             </SheetTrigger>
             <SheetContent side="right" className="bg-white text-gray-700 border-gray-200">
               <div className="flex flex-col gap-6 mt-8">
-                {navLinks.slice(0, 3).map((link) => (
+                {navLinks.map((link) => (
                   link.href.startsWith('#') ? (
                     <button
                       key={link.name}
