@@ -130,11 +130,43 @@ const PackageDetailPage = () => {
     return !Object.values(nextErrors).some(Boolean);
   };
 
-  const handlePay = () => {
+  const handlePay = async () => {
+    // 1. Calculate taxes (assuming 19% VAT)
+    const VAT_RATE = 0.19;
+    const baseAmount = Math.round(totalPrice / (1 + VAT_RATE));
+    const taxValue = totalPrice - baseAmount;
+
+    // 2. Generate reference
+    const randomSuffix = Math.floor(Math.random() * 100);
+    const reference = `${form.firstName.toUpperCase()}${form.phone}${randomSuffix}`;
+
+    // 3. Construct the payload for the API
+    const payload = {
+      amount_type: "CLOSE",
+      amount: {
+        currency: pkg.currency,
+        taxes: [
+          {
+            type: "VAT",
+            base: baseAmount,
+            value: taxValue,
+          },
+        ],
+        tip_amount: 0,
+        total_amount: totalPrice,
+      },
+      reference: reference,
+      description: pkg.name,
+      image_url: "https://reservarcolombia.com/assets/Logo-vo49VPOB.png",
+    };
+
+    // For now, we just log the payload to the console.
+    // In a real scenario, you would make an API call here.
+    console.log('Generated Payload for API:', payload);
+
     toast({
-      title: 'Funcionalidad en desarrollo',
-      description: 'El pago aún no está habilitado en esta versión.',
-      variant: 'destructive'
+      title: 'Información de pago generada',
+      description: 'Revisa la consola del navegador para ver el objeto JSON.',
     });
   };
   
