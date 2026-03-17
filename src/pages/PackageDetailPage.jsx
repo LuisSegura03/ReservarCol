@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Check, X, Plus, Minus } from 'lucide-react';
+import { ArrowLeft, Check, X, Plus, Minus, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -20,6 +20,7 @@ const PackageDetailPage = () => {
   const [pkg, setPkg] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isPaying, setIsPaying] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [form, setForm] = useState({
     firstName: '',
@@ -131,6 +132,8 @@ const PackageDetailPage = () => {
   };
 
   const handlePay = async () => {
+    setIsPaying(true);
+
     // 1. Calculate taxes (assuming 19% VAT)
     const VAT_RATE = 0.19;
     const baseAmount = Math.round(totalPrice / (1 + VAT_RATE));
@@ -160,14 +163,63 @@ const PackageDetailPage = () => {
       image_url: "https://reservarcolombia.com/assets/Logo-vo49VPOB.png",
     };
 
-    // For now, we just log the payload to the console.
-    // In a real scenario, you would make an API call here.
-    console.log('Generated Payload for API:', payload);
+    // Llamamos a nuestro propio backend, no a Bold directamente.
+    const localApiUrl = '/api/create-payment-link';
+    try {
+      const response = await fetch(localApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
 
-    toast({
-      title: 'Información de pago generada',
-      description: 'Revisa la consola del navegador para ver el objeto JSON.',
-    });
+      // Leemos la respuesta como texto primero para evitar el error de JSON.parse si viene vacía o es HTML
+      const responseText = await response.text();
+      let apiResponse;
+      
+      try {
+        apiResponse = responseText ? JSON.parse(responseText) : null;
+      } catch (e) {
+        console.error("No se pudo parsear la respuesta como JSON:", responseText);
+        throw new Error(`El servidor devolvió una respuesta no válida. Contenido: ${responseText.slice(0, 50)}...`);
+      }
+
+      if (!response.ok) {
+        throw apiResponse || { message: `Error ${response.status}: ${response.statusText}` };
+      }
+
+      if (apiResponse?.payload?.url) {
+        toast({
+          title: '¡Link de pago generado!',
+          description: 'Redirigiendo a la pasarela de pago...',
+        });
+        // Abrir la URL de pago en una nueva pestaña
+        window.open(apiResponse.payload.url, '_blank');
+        // Opcional: cerrar el panel lateral después de generar el link
+        setIsSheetOpen(false);
+      } else {
+        // Si la respuesta no tiene el formato esperado
+        console.error('Respuesta inesperada de la API:', apiResponse);
+        toast({
+          variant: 'destructive',
+          title: 'Error en Respuesta',
+          description: 'No se recibió un link de pago válido.',
+        });
+        alert(`Respuesta inesperada de la API:\n\n${JSON.stringify(apiResponse, null, 2)}`);
+      }
+
+    } catch (apiError) {
+      console.error('Error al generar el link de pago:', apiError);
+      toast({
+        variant: 'destructive',
+        title: 'Error al generar el link',
+        description: 'Hubo un problema con la API. Revisa la consola para más detalles.',
+      });
+      alert(`Error:\n\n${apiError.message || JSON.stringify(apiError, null, 2)}`);
+    } finally {
+      setIsPaying(false);
+    }
   };
   
   if (loading) {
@@ -410,9 +462,16 @@ const PackageDetailPage = () => {
                     }
                     handlePay();
                   }}
-                  disabled={Object.values(errors).some(Boolean) || !form.firstName || !form.lastName || !form.email}
+                  disabled={isPaying || Object.values(errors).some(Boolean) || !form.firstName || !form.lastName || !form.email}
                 >
-                  Pagar
+                  {isPaying ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Procesando...
+                    </>
+                  ) : (
+                    'Pagar'
+                  )}
                 </Button>
               </div>
             </SheetFooter>

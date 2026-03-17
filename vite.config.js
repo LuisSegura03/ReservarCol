@@ -1,6 +1,6 @@
 import path from 'node:path';
 import react from '@vitejs/plugin-react';
-import { createLogger, defineConfig } from 'vite';
+import { createLogger, defineConfig, loadEnv } from 'vite';
 import inlineEditPlugin from './plugins/visual-editor/vite-plugin-react-inline-editor.js';
 import editModeDevPlugin from './plugins/visual-editor/vite-plugin-edit-mode.js';
 import iframeRouteRestorationPlugin from './plugins/vite-plugin-iframe-route-restoration.js';
@@ -236,6 +236,57 @@ logger.error = (msg, options) => {
 export default defineConfig({
 	customLogger: logger,
 	plugins: [
+		// Plugin para manejar la API de Bold localmente
+		{
+			name: 'bold-api-proxy',
+			configureServer(server) {
+				// Cargamos las variables de entorno (incluyendo BOLD_API_KEY)
+				const env = loadEnv(server.config.mode, process.cwd(), '');
+
+				server.middlewares.use('/api/create-payment-link', async (req, res, next) => {
+					if (req.method === 'POST') {
+						let body = '';
+						req.on('data', chunk => { body += chunk.toString(); });
+						req.on('end', async () => {
+							try {
+								const payload = JSON.parse(body);
+								// Obtenemos la KEY segura desde el entorno del servidor
+								const apiKey = env.BOLD_API_KEY;
+
+								if (!apiKey) {
+									res.statusCode = 500;
+									res.setHeader('Content-Type', 'application/json');
+									res.end(JSON.stringify({ error: 'BOLD_API_KEY no encontrada en el archivo .env' }));
+									return;
+								}
+
+								// Hacemos la petición a Bold desde el servidor de desarrollo
+								const boldResponse = await fetch('https://integrations.api.bold.co/online/link/v1', {
+									method: 'POST',
+									headers: {
+										'Content-Type': 'application/json',
+										'Authorization': `x-api-key ${apiKey}`
+									},
+									body: JSON.stringify(payload)
+								});
+
+								const data = await boldResponse.json();
+								res.statusCode = boldResponse.status;
+								res.setHeader('Content-Type', 'application/json');
+								res.end(JSON.stringify(data));
+							} catch (error) {
+								console.error('Error en proxy local:', error);
+								res.statusCode = 500;
+								res.setHeader('Content-Type', 'application/json');
+								res.end(JSON.stringify({ error: error.message }));
+							}
+						});
+					} else {
+						next();
+					}
+				});
+			}
+		},
 		...(isDev ? [inlineEditPlugin(), editModeDevPlugin(), iframeRouteRestorationPlugin(), selectionModePlugin()] : []),
 		react(),
 		addTransformIndexHtml
