@@ -32,6 +32,9 @@ if (!$data) {
 $boldApiUrl = 'https://integrations.api.bold.co/online/link/v1';
 $apiKey = getenv('BOLD_API_KEY') ?: 'tu_api_key_aqui'; // Configurar en variables de entorno
 
+// Debug: Log de la API key (remover en producción)
+error_log('BOLD_API_KEY: ' . (empty($apiKey) ? 'NOT_SET' : 'SET_' . substr($apiKey, 0, 10) . '...'));
+
 // Headers para Bold
 $headers = [
     'Content-Type: application/json',
@@ -46,10 +49,20 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
 
+// Debug: Log de la petición
+error_log('Bold API Request: ' . $boldApiUrl);
+error_log('Headers: ' . json_encode($headers));
+error_log('Payload: ' . json_encode($data));
+
 // Ejecutar la petición
 $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 $error = curl_error($ch);
+
+// Debug: Log de la respuesta
+error_log('HTTP Code: ' . $httpCode);
+error_log('cURL Error: ' . $error);
+error_log('Response: ' . substr($response, 0, 500));
 
 curl_close($ch);
 
