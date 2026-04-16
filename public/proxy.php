@@ -11,6 +11,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
+// Diagnóstico: permitir GET para confirmar que el proxy está accesible
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    echo json_encode(['status' => 'proxy alive']);
+    exit();
+}
+
 // Solo permitir POST para crear links
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);

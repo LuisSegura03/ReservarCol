@@ -6,6 +6,9 @@ Header always set Access-Control-Allow-Origin "*"
 Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS"
 Header always set Access-Control-Allow-Headers "Content-Type"
 
+# Excluir archivos PHP del fallback SPA y permitir su ejecución directa
+RewriteRule ^(proxy\.php|check-status\.php)$ - [L]
+
 # Redirigir todas las peticiones que no sean archivos existentes a index.html (SPA)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
