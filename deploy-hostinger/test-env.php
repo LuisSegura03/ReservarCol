@@ -46,7 +46,13 @@ $result = [
         '_SERVER' => isset($_SERVER['BOLD_API_KEY']),
         'getenv' => getenv('BOLD_API_KEY') !== false,
         '.env_file' => file_exists(__DIR__ . '/.env')
-    ]
+    ],
+    'env_values' => [
+        '_ENV_BOLD_API_KEY' => isset($_ENV['BOLD_API_KEY']) ? 'SET' : 'NOT_SET',
+        '_SERVER_BOLD_API_KEY' => isset($_SERVER['BOLD_API_KEY']) ? 'SET' : 'NOT_SET',
+        'getenv_BOLD_API_KEY' => getenv('BOLD_API_KEY') ? 'SET' : 'NOT_SET'
+    ],
+    'all_env_vars' => array_keys(array_merge($_ENV, $_SERVER))
 ];
 
 echo json_encode($result, JSON_PRETTY_PRINT);
