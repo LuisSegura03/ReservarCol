@@ -36,10 +36,32 @@ if (!$data) {
 
 // Configuración de Bold API
 $boldApiUrl = 'https://integrations.api.bold.co/online/link/v1';
-$apiKey = getenv('BOLD_API_KEY') ?: 'tu_api_key_aqui'; // Configurar en variables de entorno
 
-// Debug: Log de la API key (remover en producción)
-error_log('BOLD_API_KEY: ' . (empty($apiKey) ? 'NOT_SET' : 'SET_' . substr($apiKey, 0, 10) . '...'));
+function getEnvValue(string $name): ?string {
+    if (isset($_ENV[$name]) && $_ENV[$name] !== '') {
+        return $_ENV[$name];
+    }
+    if (isset($_SERVER[$name]) && $_SERVER[$name] !== '') {
+        return $_SERVER[$name];
+    }
+    $value = getenv($name);
+    return $value === false ? null : $value;
+}
+
+$apiKey = getEnvValue('BOLD_API_KEY');
+
+$apiKeySource = [];
+if (isset($_ENV['BOLD_API_KEY'])) { $apiKeySource[] = 'ENV'; }
+if (isset($_SERVER['BOLD_API_KEY'])) { $apiKeySource[] = 'SERVER'; }
+if (getenv('BOLD_API_KEY') !== false) { $apiKeySource[] = 'getenv'; }
+error_log('BOLD_API_KEY source: ' . implode(', ', array_unique($apiKeySource)));
+error_log('BOLD_API_KEY set: ' . ($apiKey ? 'YES' : 'NO'));
+
+if (!$apiKey) {
+    http_response_code(500);
+    echo json_encode(['error' => 'BOLD_API_KEY no encontrada en el entorno del servidor']);
+    exit();
+}
 
 // Headers para Bold
 $headers = [
