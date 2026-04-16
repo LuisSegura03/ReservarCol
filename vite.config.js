@@ -285,6 +285,50 @@ export default defineConfig({
 						next();
 					}
 				});
+
+				// Endpoint para validar el estado del pago
+				server.middlewares.use('/api/check-payment-status', async (req, res, next) => {
+					if (req.method === 'GET' && req.url && req.url !== '/') {
+						try {
+							const paymentLinkId = req.url.replace(/^\//, '').split('?')[0];
+							if (!paymentLinkId) {
+								res.statusCode = 400;
+								res.setHeader('Content-Type', 'application/json');
+								res.end(JSON.stringify({ error: 'paymentLinkId no proporcionado en la ruta' }));
+								return;
+							}
+							const apiKey = env.BOLD_API_KEY;
+
+							if (!apiKey) {
+								res.statusCode = 500;
+								res.setHeader('Content-Type', 'application/json');
+								res.end(JSON.stringify({ error: 'BOLD_API_KEY no encontrada en el archivo .env' }));
+								return;
+							}
+
+							// Hacemos la petición GET a Bold desde el servidor de desarrollo
+							const boldResponse = await fetch(`https://integrations.api.bold.co/online/link/v1/${paymentLinkId}`, {
+								method: 'GET',
+								headers: {
+									'Content-Type': 'application/json',
+									'Authorization': `x-api-key ${apiKey}`
+								}
+							});
+
+							const data = await boldResponse.json();
+							res.statusCode = boldResponse.status;
+							res.setHeader('Content-Type', 'application/json');
+							res.end(JSON.stringify(data));
+						} catch (error) {
+							console.error('Error validando estado del pago:', error);
+							res.statusCode = 500;
+							res.setHeader('Content-Type', 'application/json');
+							res.end(JSON.stringify({ error: error.message }));
+						}
+					} else {
+						next();
+					}
+				});
 			}
 		},
 		...(isDev ? [inlineEditPlugin(), editModeDevPlugin(), iframeRouteRestorationPlugin(), selectionModePlugin()] : []),

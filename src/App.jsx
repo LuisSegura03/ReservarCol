@@ -4,6 +4,7 @@ import { Route, Routes, BrowserRouter as Router } from 'react-router-dom';
 import ScrollToTop from './components/ScrollToTop';
 import HomePage from './pages/HomePage';
 import PackageDetailPage from './pages/PackageDetailPage';
+import PaymentWaitingPage from './pages/PaymentWaitingPage';
 import { Toaster } from './components/ui/toaster';
 
 // Admin imports
@@ -28,6 +29,7 @@ function App() {
             {/* Public Routes */}
             <Route path="/" element={<HomePage />} />
             <Route path="/package/:id" element={<PackageDetailPage />} />
+            <Route path="/payment-waiting/:paymentLinkId" element={<PaymentWaitingPage />} />
             
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminLoginPage />} />

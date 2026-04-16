@@ -98,13 +98,6 @@ const AdminLoginPage = () => {
             </Button>
           </form>
 
-          <div className="mt-6 p-4 bg-slate-100 rounded-lg text-xs text-slate-600 space-y-2">
-            <p className="font-semibold">Credenciales de Demo:</p>
-            <p>Admin: admin@reservarcolombia.com / admin123</p>
-            <p>Asesor: asesor@reservarcolombia.com / asesor123</p>
-            <p className="text-green-600 mt-2">✓ Sistema con contraseñas encriptadas</p>
-          </div>
-
           {/* Botón adicional para ir a la landing page */}
           <div className="mt-4 text-center">
             <Link 

@@ -131,7 +131,26 @@ const PackageDetailPage = () => {
     return !Object.values(nextErrors).some(Boolean);
   };
 
+  const savePendingReservationDraft = (paymentLinkId) => {
+    if (!paymentLinkId || !pkg) return;
+
+    const reservationDraft = {
+      plan_id: pkg.id,
+      customer_name: `${form.firstName.trim()} ${form.lastName.trim()}`,
+      customer_email: form.email.trim(),
+      customer_phone: form.phone.trim(),
+      number_of_people: Number(form.passengers),
+      total_price: totalPrice,
+      payment_link: paymentLinkId,
+      status: 'ACTIVE',
+      payment_status: 'ACTIVE',
+    };
+
+    sessionStorage.setItem(`pendingReservation:${paymentLinkId}`, JSON.stringify(reservationDraft));
+  };
+
   const handlePay = async () => {
+    let redirecting = false;
     setIsPaying(true);
 
     // 1. Calculate taxes (assuming 19% VAT)
@@ -190,14 +209,17 @@ const PackageDetailPage = () => {
       }
 
       if (apiResponse?.payload?.url) {
+        redirecting = true;
+        const paymentLinkId = apiResponse.payload.payment_link;
+        savePendingReservationDraft(paymentLinkId);
         toast({
-          title: '¡Link de pago generado!',
-          description: 'Redirigiendo a la pasarela de pago...',
+          title: 'Link de pago generado',
+          description: 'Se abrió la pasarela de pago en una nueva pestaña.',
         });
-        // Abrir la URL de pago en una nueva pestaña
-        window.open(apiResponse.payload.url, '_blank');
-        // Opcional: cerrar el panel lateral después de generar el link
         setIsSheetOpen(false);
+        window.open(apiResponse.payload.url, '_blank');
+        // Navegar a la página de espera
+        navigate(`/payment-waiting/${paymentLinkId}`);
       } else {
         // Si la respuesta no tiene el formato esperado
         console.error('Respuesta inesperada de la API:', apiResponse);
@@ -218,7 +240,9 @@ const PackageDetailPage = () => {
       });
       alert(`Error:\n\n${apiError.message || JSON.stringify(apiError, null, 2)}`);
     } finally {
-      setIsPaying(false);
+      if (!redirecting) {
+        setIsPaying(false);
+      }
     }
   };
   
