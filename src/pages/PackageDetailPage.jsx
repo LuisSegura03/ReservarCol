@@ -160,7 +160,7 @@ const PackageDetailPage = () => {
 
     // 2. Generate reference
     const randomSuffix = Math.floor(Math.random() * 100);
-    const reference = `${form.firstName.toUpperCase()}${form.phone}${randomSuffix}`;
+    const reference = `${form.phone}${randomSuffix}`;
 
     // 3. Construct the payload for the API
     const payload = {
