@@ -44,7 +44,7 @@ error_log('BOLD_API_KEY: ' . (empty($apiKey) ? 'NOT_SET' : 'SET_' . substr($apiK
 // Headers para Bold
 $headers = [
     'Content-Type: application/json',
-    'Authorization: Bearer ' . $apiKey
+    'Authorization: x-api-key ' . $apiKey
 ];
 
 // Inicializar cURL

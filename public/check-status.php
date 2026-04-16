@@ -35,7 +35,7 @@ $apiKey = getenv('BOLD_API_KEY') ?: 'tu_api_key_aqui'; // Configurar en variable
 
 // Headers para Bold
 $headers = [
-    'Authorization: Bearer ' . $apiKey
+    'Authorization: x-api-key ' . $apiKey
 ];
 
 // Inicializar cURL
