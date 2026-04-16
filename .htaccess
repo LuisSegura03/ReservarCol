@@ -6,6 +6,11 @@ Header always set Access-Control-Allow-Origin "*"
 Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS"
 Header always set Access-Control-Allow-Headers "Content-Type"
 
+# Bloquear acceso directo a archivos .env si llegan a estar en public_html
+<FilesMatch "^\.env$">
+    Require all denied
+</FilesMatch>
+
 # Excluir archivos PHP del fallback SPA y permitir su ejecución directa
 RewriteRule ^(proxy\.php|check-status\.php|test-env\.php|create-env\.php|set-env\.php)$ - [L]
 

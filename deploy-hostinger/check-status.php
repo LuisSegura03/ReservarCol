@@ -35,11 +35,11 @@ $boldApiUrl = 'https://integrations.api.bold.co/online/link/v1/' . $paymentLinkI
 function getEnvValue(string $name): ?string {
     // Intentar múltiples fuentes para variables de entorno en hosting compartido
     if (isset($_ENV[$name]) && $_ENV[$name] !== '') {
-        error_log("Found $name in \$_ENV");
+        error_log("Found $name in \\$_ENV");
         return $_ENV[$name];
     }
     if (isset($_SERVER[$name]) && $_SERVER[$name] !== '') {
-        error_log("Found $name in \$_SERVER");
+        error_log("Found $name in \\$_SERVER");
         return $_SERVER[$name];
     }
     $value = getenv($name);
@@ -49,16 +49,30 @@ function getEnvValue(string $name): ?string {
     }
 
     // En algunos hosting, las variables están en archivos .env
-    $envFile = __DIR__ . '/../.env';
-    if (file_exists($envFile)) {
+    $envFiles = [
+        __DIR__ . '/.env',
+        __DIR__ . '/../.env',
+        __DIR__ . '/public/.env',
+        __DIR__ . '/../../.env'
+    ];
+
+    foreach ($envFiles as $envFile) {
+        error_log("Checking env file: $envFile");
+        if (!file_exists($envFile)) {
+            error_log("Env file not found: $envFile");
+            continue;
+        }
+
+        error_log("Env file found: $envFile");
         $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         foreach ($lines as $line) {
             if (strpos(trim($line), '#') === 0) continue;
+            if (strpos($line, '=') === false) continue;
             list($key, $val) = explode('=', $line, 2);
             $key = trim($key);
             $val = trim($val);
             if ($key === $name && $val !== '') {
-                error_log("Found $name in .env file");
+                error_log("Found $name in $envFile");
                 return $val;
             }
         }

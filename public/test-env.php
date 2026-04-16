@@ -16,11 +16,22 @@ function getEnvValue(string $name): ?string {
     }
 
     // En algunos hosting, las variables están en archivos .env
-    $envFile = __DIR__ . '/.env';
-    if (file_exists($envFile)) {
+    $envFiles = [
+        __DIR__ . '/.env',
+        __DIR__ . '/../.env',
+        __DIR__ . '/public/.env',
+        __DIR__ . '/../../.env'
+    ];
+
+    foreach ($envFiles as $envFile) {
+        if (!file_exists($envFile)) {
+            continue;
+        }
+
         $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         foreach ($lines as $line) {
             if (strpos(trim($line), '#') === 0) continue;
+            if (strpos($line, '=') === false) continue;
             list($key, $val) = explode('=', $line, 2);
             $key = trim($key);
             $val = trim($val);
@@ -45,7 +56,8 @@ $result = [
         '_ENV' => isset($_ENV['BOLD_API_KEY']),
         '_SERVER' => isset($_SERVER['BOLD_API_KEY']),
         'getenv' => getenv('BOLD_API_KEY') !== false,
-        '.env_file' => file_exists(__DIR__ . '/.env')
+        '.env_file' => file_exists(__DIR__ . '/.env'),
+        'parent_env_file' => file_exists(__DIR__ . '/../.env')
     ],
     'env_values' => [
         '_ENV_BOLD_API_KEY' => isset($_ENV['BOLD_API_KEY']) ? 'SET' : 'NOT_SET',

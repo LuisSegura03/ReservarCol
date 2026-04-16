@@ -52,17 +52,22 @@ function getEnvValue(string $name): ?string {
     $envFiles = [
         __DIR__ . '/.env',
         __DIR__ . '/../.env',
-        __DIR__ . '/public/.env'
+        __DIR__ . '/public/.env',
+        __DIR__ . '/../../.env'
     ];
 
     foreach ($envFiles as $envFile) {
+        error_log("Checking env file: $envFile");
         if (!file_exists($envFile)) {
+            error_log("Env file not found: $envFile");
             continue;
         }
 
+        error_log("Env file found: $envFile");
         $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         foreach ($lines as $line) {
             if (strpos(trim($line), '#') === 0) continue;
+            if (strpos($line, '=') === false) continue;
             list($key, $val) = explode('=', $line, 2);
             $key = trim($key);
             $val = trim($val);
