@@ -30,7 +30,9 @@ echo "📁 Copiando archivos..."
 cp -r dist/* $DEPLOY_DIR/
 cp public/proxy.php $DEPLOY_DIR/
 cp public/check-status.php $DEPLOY_DIR/
+cp public/test-env.php $DEPLOY_DIR/
 cp public/.htaccess $DEPLOY_DIR/
+cp .env $DEPLOY_DIR/ 2>/dev/null || echo "⚠️  .env no encontrado, asegúrate de configurar BOLD_API_KEY manualmente"
 
 # Crear archivo de configuración
 cat > $DEPLOY_DIR/README-HOSTINGER.md << 'EOF'
@@ -40,9 +42,16 @@ cat > $DEPLOY_DIR/README-HOSTINGER.md << 'EOF'
 Sube todo el contenido de esta carpeta a `public_html/` en Hostinger.
 
 ## 2. Configurar variables de entorno
+**Opción A: Panel de Hostinger**
 En Hostinger > Sitios web > Administrador > Variables de entorno:
 ```
 BOLD_API_KEY=tu_clave_api_de_bold_aqui
+```
+
+**Opción B: Archivo .env (recomendado para hosting compartido)**
+Si el panel de variables no funciona, el script ya copió tu `.env` local. Verifica que contenga:
+```
+BOLD_API_KEY=kpLzvafnrXJuRQxuGbe51_gp03AAMlxsAQQVa8oV8d8
 ```
 
 ## 3. Verificar permisos
@@ -52,6 +61,9 @@ Asegúrate de que los archivos PHP tengan permisos 644:
 
 ## 4. Probar
 Visita tu sitio y prueba crear un pago.
+
+**Diagnóstico de variables de entorno:**
+Visita `https://tu-dominio.com/test-env.php` para verificar si la API key se está leyendo correctamente.
 
 ## 🔧 Troubleshooting
 - Si ves código PHP en lugar de JSON: Verifica permisos y configuración PHP

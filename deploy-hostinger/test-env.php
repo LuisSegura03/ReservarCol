@@ -1,0 +1,53 @@
+<?php
+// test-env.php - Script para probar la lectura de variables de entorno en Hostinger
+header('Content-Type: application/json');
+
+function getEnvValue(string $name): ?string {
+    // Intentar múltiples fuentes para variables de entorno en hosting compartido
+    if (isset($_ENV[$name]) && $_ENV[$name] !== '') {
+        return $_ENV[$name];
+    }
+    if (isset($_SERVER[$name]) && $_SERVER[$name] !== '') {
+        return $_SERVER[$name];
+    }
+    $value = getenv($name);
+    if ($value !== false && $value !== '') {
+        return $value;
+    }
+
+    // En algunos hosting, las variables están en archivos .env
+    $envFile = __DIR__ . '/.env';
+    if (file_exists($envFile)) {
+        $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            if (strpos(trim($line), '#') === 0) continue;
+            list($key, $val) = explode('=', $line, 2);
+            $key = trim($key);
+            $val = trim($val);
+            if ($key === $name && $val !== '') {
+                return $val;
+            }
+        }
+    }
+
+    return null;
+}
+
+$apiKey = getEnvValue('BOLD_API_KEY');
+
+$result = [
+    'timestamp' => date('Y-m-d H:i:s'),
+    'php_version' => phpversion(),
+    'api_key_found' => $apiKey !== null,
+    'api_key_length' => $apiKey ? strlen($apiKey) : 0,
+    'api_key_prefix' => $apiKey ? substr($apiKey, 0, 10) . '...' : null,
+    'sources_checked' => [
+        '_ENV' => isset($_ENV['BOLD_API_KEY']),
+        '_SERVER' => isset($_SERVER['BOLD_API_KEY']),
+        'getenv' => getenv('BOLD_API_KEY') !== false,
+        '.env_file' => file_exists(__DIR__ . '/.env')
+    ]
+];
+
+echo json_encode($result, JSON_PRETTY_PRINT);
+?>
