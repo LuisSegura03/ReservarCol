@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 
-const SolicitudesManagement = () => {
+const ReservasManagement = () => {
   const { solicitudes, updateSolicitud } = useAdminContext();
   const { toast } = useToast();
 
@@ -89,4 +89,4 @@ const SolicitudesManagement = () => {
   );
 };
 
-export default SolicitudesManagement;
+export default ReservasManagement;

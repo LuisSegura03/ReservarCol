@@ -10,7 +10,7 @@ export const useAdminContext = () => useContext(AdminContext);
 
 export const AdminProvider = ({ children }) => {
   const { toast } = useToast();
-  const { user: authUser } = useAdminAuth();
+  const { user: authUser, adminSignOut } = useAdminAuth();
   const location = useLocation();
   
   const [destinos, setDestinos] = useState([]);
@@ -203,6 +203,18 @@ export const AdminProvider = ({ children }) => {
     }
   };
 
+  // ─── LOGOUT ───────────────────────────────────────────────
+
+  const logout = async () => {
+    try {
+      await adminSignOut();
+      toast({ title: 'Sesión cerrada', description: 'Has cerrado sesión exitosamente' });
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      toast({ variant: 'destructive', title: 'Error', description: 'No se pudo cerrar la sesión' });
+    }
+  };
+
   // ─── PROVIDER ─────────────────────────────────────────────
 
   return (
@@ -223,6 +235,7 @@ export const AdminProvider = ({ children }) => {
       fetchReservations,
       updateSolicitud,
       deleteSolicitud,
+      logout,
     }}>
       {children}
     </AdminContext.Provider>

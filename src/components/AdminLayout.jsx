@@ -20,7 +20,7 @@ const AdminLayout = ({ children }) => {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/admin/dashboard' },
     { icon: Map, label: 'Destinos', path: '/admin/destinos' },
     { icon: Briefcase, label: 'Planes', path: '/admin/planes' },
-    { icon: Inbox, label: 'Solicitudes', path: '/admin/solicitudes' },
+    { icon: Inbox, label: 'Reservas', path: '/admin/solicitudes' },
     { icon: Settings, label: 'Configuración', path: '/admin/configuracion' },
   ];
 

@@ -15,7 +15,7 @@ import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboard from './pages/AdminDashboard';
 import DestinosManagement from './pages/DestinosManagement';
 import PlanesManagement from './pages/PlansManagement';
-import SolicitudesManagement from './pages/SolicitudesManagement';
+import ReservasManagement from './pages/ReservasManagement';
 import ConfiguracionPage from './pages/ConfiguracionPage';
 
 function App() {
@@ -36,7 +36,7 @@ function App() {
             <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/destinos" element={<ProtectedRoute><DestinosManagement /></ProtectedRoute>} />
             <Route path="/admin/planes" element={<ProtectedRoute><PlanesManagement /></ProtectedRoute>} />
-            <Route path="/admin/solicitudes" element={<ProtectedRoute><SolicitudesManagement /></ProtectedRoute>} />
+            <Route path="/admin/solicitudes" element={<ProtectedRoute><ReservasManagement /></ProtectedRoute>} />
             <Route path="/admin/configuracion" element={<ProtectedRoute><ConfiguracionPage /></ProtectedRoute>} />
           </Routes>
           <Toaster />
