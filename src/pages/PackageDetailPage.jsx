@@ -182,10 +182,12 @@ const PackageDetailPage = () => {
       image_url: "https://reservarcolombia.com/assets/Logo-vo49VPOB.png",
     };
 
-    // Llamamos a nuestro propio backend, no a Bold directamente.
-    const localApiUrl = '/api/create-payment-link';
+    // Detectar si estamos en desarrollo o producción
+    const isDevelopment = import.meta.env.DEV;
+    const proxyUrl = isDevelopment ? '/api/create-payment-link' : '/proxy.php';
+
     try {
-      const response = await fetch(localApiUrl, {
+      const response = await fetch(proxyUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

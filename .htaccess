@@ -1,0 +1,23 @@
+# .htaccess para Hostinger - Manejo de rutas PHP
+RewriteEngine On
+
+# Permitir CORS
+Header always set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+Header always set Access-Control-Allow-Headers "Content-Type"
+
+# Redirigir todas las peticiones que no sean archivos existentes a index.html (SPA)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
+
+# Asegurar que los archivos PHP se ejecuten correctamente
+<Files "*.php">
+    SetHandler application/x-httpd-php
+</Files>
+
+# Configuración de PHP
+php_value upload_max_filesize 10M
+php_value post_max_size 10M
+php_value memory_limit 256M
+php_value max_execution_time 300

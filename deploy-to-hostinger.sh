@@ -1,0 +1,76 @@
+#!/bin/bash
+# Script de despliegue para Hostinger con proxy PHP
+
+echo "🚀 Iniciando despliegue para Hostinger..."
+
+# Verificar que estemos en el directorio correcto
+if [ ! -f "package.json" ]; then
+    echo "❌ Error: Ejecuta este script desde la raíz del proyecto"
+    exit 1
+fi
+
+# Build de producción
+echo "📦 Construyendo aplicación..."
+npm run build
+
+if [ $? -ne 0 ]; then
+    echo "❌ Error en el build"
+    exit 1
+fi
+
+echo "✅ Build completado"
+
+# Crear directorio de despliegue
+DEPLOY_DIR="deploy-hostinger"
+rm -rf $DEPLOY_DIR
+mkdir -p $DEPLOY_DIR
+
+# Copiar archivos de producción
+echo "📁 Copiando archivos..."
+cp -r dist/* $DEPLOY_DIR/
+cp public/proxy.php $DEPLOY_DIR/
+cp public/check-status.php $DEPLOY_DIR/
+cp public/.htaccess $DEPLOY_DIR/
+
+# Crear archivo de configuración
+cat > $DEPLOY_DIR/README-HOSTINGER.md << 'EOF'
+# 📋 Configuración en Hostinger
+
+## 1. Subir archivos
+Sube todo el contenido de esta carpeta a `public_html/` en Hostinger.
+
+## 2. Configurar variables de entorno
+En Hostinger > Sitios web > Administrador > Variables de entorno:
+```
+BOLD_API_KEY=tu_clave_api_de_bold_aqui
+```
+
+## 3. Verificar permisos
+Asegúrate de que los archivos PHP tengan permisos 644:
+- `proxy.php` → 644
+- `check-status.php` → 644
+
+## 4. Probar
+Visita tu sitio y prueba crear un pago.
+
+## 🔧 Troubleshooting
+- Si ves código PHP en lugar de JSON: Verifica permisos y configuración PHP
+- Si hay errores CORS: Revisa el .htaccess
+- Si no funciona la API: Verifica la variable BOLD_API_KEY
+EOF
+
+echo "📋 Creando archivo ZIP para Hostinger..."
+cd $DEPLOY_DIR
+zip -r ../reservar-colombia-hostinger.zip .
+cd ..
+
+echo "✅ Despliegue listo!"
+echo ""
+echo "📦 Archivo creado: reservar-colombia-hostinger.zip"
+echo "📖 Lee las instrucciones en: deploy-hostinger/README-HOSTINGER.md"
+echo ""
+echo "🎯 Próximos pasos:"
+echo "1. Sube el ZIP a Hostinger"
+echo "2. Extrae en public_html/"
+echo "3. Configura BOLD_API_KEY"
+echo "4. Prueba la aplicación"

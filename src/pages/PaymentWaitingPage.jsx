@@ -83,7 +83,8 @@ const PaymentWaitingPage = () => {
     if (!paymentLinkId) return;
     setIsChecking(true);
     try {
-      const url = `/api/check-payment-status/${paymentLinkId}`;
+      const isDevelopment = import.meta.env.DEV;
+      const url = isDevelopment ? `/api/check-payment-status/${paymentLinkId}` : `/check-status.php/${paymentLinkId}`;
       const response = await fetch(url);
       const text = await response.text();
       let data;
