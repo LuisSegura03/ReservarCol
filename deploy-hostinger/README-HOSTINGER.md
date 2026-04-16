@@ -11,10 +11,14 @@ BOLD_API_KEY=tu_clave_api_de_bold_aqui
 ```
 
 **Opción B: Archivo .env (recomendado para hosting compartido)**
-Si el panel de variables no funciona, el script ya copió tu `.env` local. Verifica que contenga:
+1. **Método automático:** Visita `https://tu-dominio.com/create-env.php` para crear el archivo automáticamente
+2. **Método manual:** Crea un archivo llamado `.env` en tu directorio `public_html/` con este contenido:
+
 ```
 BOLD_API_KEY=kpLzvafnrXJuRQxuGbe51_gp03AAMlxsAQQVa8oV8d8
 ```
+
+**Importante:** El archivo debe llamarse exactamente `.env` (con punto al inicio) y estar en la raíz de `public_html/`.
 
 ## 3. Verificar permisos
 Asegúrate de que los archivos PHP tengan permisos 644:

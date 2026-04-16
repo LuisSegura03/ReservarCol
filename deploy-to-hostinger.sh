@@ -31,8 +31,9 @@ cp -r dist/* $DEPLOY_DIR/
 cp public/proxy.php $DEPLOY_DIR/
 cp public/check-status.php $DEPLOY_DIR/
 cp public/test-env.php $DEPLOY_DIR/
+cp public/create-env.php $DEPLOY_DIR/
 cp public/.htaccess $DEPLOY_DIR/
-cp .env $DEPLOY_DIR/ 2>/dev/null || echo "⚠️  .env no encontrado, asegúrate de configurar BOLD_API_KEY manualmente"
+cp .env-hostinger $DEPLOY_DIR/.env-example
 
 # Crear archivo de configuración
 cat > $DEPLOY_DIR/README-HOSTINGER.md << 'EOF'
@@ -49,10 +50,14 @@ BOLD_API_KEY=tu_clave_api_de_bold_aqui
 ```
 
 **Opción B: Archivo .env (recomendado para hosting compartido)**
-Si el panel de variables no funciona, el script ya copió tu `.env` local. Verifica que contenga:
+1. **Método automático:** Visita `https://tu-dominio.com/create-env.php` para crear el archivo automáticamente
+2. **Método manual:** Crea un archivo llamado `.env` en tu directorio `public_html/` con este contenido:
+
 ```
 BOLD_API_KEY=kpLzvafnrXJuRQxuGbe51_gp03AAMlxsAQQVa8oV8d8
 ```
+
+**Importante:** El archivo debe llamarse exactamente `.env` (con punto al inicio) y estar en la raíz de `public_html/`.
 
 ## 3. Verificar permisos
 Asegúrate de que los archivos PHP tengan permisos 644:
