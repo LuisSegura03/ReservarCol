@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Loader2, Check, X } from 'lucide-react';
@@ -20,6 +20,10 @@ const PaymentWaitingPage = () => {
   const [pollTimeoutReached, setPollTimeoutReached] = useState(false);
   const [pollStartTime, setPollStartTime] = useState(null);
 
+  // Referencias para evitar condiciones de carrera (ejecuciones paralelas)
+  const isSavingRef = useRef(false);
+  const isCheckingRef = useRef(false);
+
   const getPendingReservationDraft = () => {
     if (!paymentLinkId) return null;
     const serialized = sessionStorage.getItem(`pendingReservation:${paymentLinkId}`);
@@ -36,12 +40,15 @@ const PaymentWaitingPage = () => {
   const saveReservationIfFinal = async (status) => {
     const finalStates = ['PAID', 'REJECTED', 'CANCELLED', 'EXPIRED'];
     if (!paymentLinkId || reservationSaved || !finalStates.includes(status)) return;
+    if (isSavingRef.current) return; // Si ya se está guardando, salimos.
 
     const draft = getPendingReservationDraft();
     if (!draft) {
       console.warn('No se encontró el borrador de reserva para paymentLinkId:', paymentLinkId);
       return;
     }
+
+    isSavingRef.current = true; // Bloqueamos la inserción concurrente
 
     try {
       const { data: existingData, error: fetchError } = await supabase
@@ -56,12 +63,19 @@ const PaymentWaitingPage = () => {
         return;
       }
 
-        const reservationRow = {
+      const reservationRow = {
         plan_id: draft.plan_id,
         customer_name: draft.customer_name,
         customer_email: draft.customer_email,
         customer_phone: draft.customer_phone,
         number_of_people: draft.number_of_people,
+        number_of_adults: draft.number_of_adults,
+        number_of_children: draft.number_of_children,
+        children_ages: draft.children_ages,
+        departure_date: draft.departure_date,
+        return_date: draft.return_date,
+        origin_city: draft.origin_city,
+        special_requirements: draft.special_requirements,
         total_price: draft.total_price,
         payment_link: draft.payment_link,
         status,
@@ -76,12 +90,16 @@ const PaymentWaitingPage = () => {
     } catch (error) {
       console.error('Error guardando la reserva:', error);
       setSaveError('No se pudo guardar la reserva en la base de datos. Intenta nuevamente.');
+      isSavingRef.current = false; // Liberamos el bloqueo si ocurre un error
     }
   };
 
   const checkPaymentStatus = async () => {
-    if (!paymentLinkId) return;
+    if (!paymentLinkId || isCheckingRef.current) return;
+    
     setIsChecking(true);
+    isCheckingRef.current = true; // Bloqueamos el chequeo concurrente
+    
     try {
       const isDevelopment = import.meta.env.DEV;
       const url = isDevelopment ? `/api/check-payment-status/${paymentLinkId}` : `/check-status.php/${paymentLinkId}`;
@@ -115,20 +133,9 @@ const PaymentWaitingPage = () => {
       });
     } finally {
       setIsChecking(false);
+      isCheckingRef.current = false; // Liberamos el chequeo
     }
   };
-
-  // Polling automático cada 5 segundos (solo si no está en estado final)
-  useEffect(() => {
-    if (!paymentLinkId) return;
-
-    // Detener polling si ya llegó a un estado final
-    const finalStates = ['PAID', 'REJECTED', 'CANCELLED', 'EXPIRED'];
-    if (finalStates.includes(paymentStatus)) return;
-
-    const interval = setInterval(checkPaymentStatus, 15000);
-    return () => clearInterval(interval);
-  }, [paymentLinkId, paymentStatus]);
 
   useEffect(() => {
     if (!paymentLinkId) return;
@@ -225,9 +232,65 @@ const PaymentWaitingPage = () => {
   const content = getStatusContent();
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col pt-16">
       <Header />
-      <div className={`flex-1 flex items-center justify-center ${content.bgClass} px-4`}>
+      <div className={`flex-1 flex flex-col items-center justify-center ${content.bgClass} px-4 pb-12`}>
+        {/* Progress Steps */}
+        <div className="mb-12 relative w-full max-w-2xl mx-auto px-8">
+          {/* Connecting Line Background */}
+          <div className="absolute top-[20px] left-[10%] right-[10%] h-1 bg-gray-200 -z-10 rounded-full"></div>
+          {/* Connecting Line Progress */}
+          <div 
+            className={`absolute top-[20px] left-[10%] h-1 transition-all duration-1000 ease-in-out -z-10 rounded-full ${
+              (paymentStatus === 'REJECTED' || paymentStatus === 'CANCELLED' || paymentStatus === 'EXPIRED') 
+                ? 'bg-red-500' 
+                : 'bg-primary'
+            }`}
+            style={{ 
+              width: paymentStatus === 'PAID' || paymentStatus === 'REJECTED' || paymentStatus === 'CANCELLED' || paymentStatus === 'EXPIRED' 
+                ? '80%' 
+                : '40%' 
+            }}
+          ></div>
+
+          <div className="flex items-center justify-between">
+            {/* Step 1 */}
+            <div className="flex flex-col items-center group">
+              <div className="relative w-10 h-10 rounded-full flex items-center justify-center font-bold text-base transition-all duration-500 shadow-sm bg-primary text-white shadow-primary/30 ring-4 ring-primary/20">
+                <Check className="w-5 h-5 animate-in zoom-in duration-300" />
+              </div>
+              <span className="mt-3 text-sm font-semibold tracking-wide text-slate-900">
+                Datos reserva
+              </span>
+            </div>
+
+            {/* Step 2 */}
+            <div className="flex flex-col items-center group">
+              <div className={`relative w-10 h-10 rounded-full flex items-center justify-center font-bold text-base transition-all duration-500 shadow-sm ${
+                  paymentStatus === 'PAID' 
+                    ? 'bg-primary text-white shadow-primary/30 ring-4 ring-primary/20' 
+                    : (paymentStatus === 'REJECTED' || paymentStatus === 'CANCELLED' || paymentStatus === 'EXPIRED')
+                      ? 'bg-red-500 text-white shadow-red-500/30 ring-4 ring-red-500/20'
+                      : 'bg-white text-primary border-2 border-primary ring-4 ring-primary/20'
+                }`}>
+                {paymentStatus !== 'PAID' && paymentStatus !== 'REJECTED' && paymentStatus !== 'CANCELLED' && paymentStatus !== 'EXPIRED' && (
+                  <span className="absolute inset-0 rounded-full animate-ping bg-primary opacity-20"></span>
+                )}
+                {paymentStatus === 'PAID' ? <Check className="w-5 h-5 animate-in zoom-in duration-300" /> 
+                 : (paymentStatus === 'REJECTED' || paymentStatus === 'CANCELLED' || paymentStatus === 'EXPIRED') ? <X className="w-5 h-5 animate-in zoom-in duration-300" />
+                 : <Loader2 className="w-5 h-5 animate-spin text-primary" />}
+              </div>
+              <span className={`mt-3 text-sm font-semibold tracking-wide transition-colors duration-300 ${
+                  paymentStatus === 'PAID' ? 'text-slate-900' :
+                  (paymentStatus === 'REJECTED' || paymentStatus === 'CANCELLED' || paymentStatus === 'EXPIRED') ? 'text-red-500' :
+                  'text-primary'
+                }`}>
+                Pago
+              </span>
+            </div>
+          </div>
+        </div>
+
         <div className="w-full max-w-xl rounded-[32px] border border-slate-200 bg-white p-10 text-center shadow-xl">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
             {content.icon}

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowLeft, Check, X, Plus, Minus, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
@@ -28,6 +29,13 @@ const PackageDetailPage = () => {
     phone: '',
     email: '',
     passengers: 1,
+    departureDate: '',
+    returnDate: '',
+    originCity: '',
+    numberOfAdults: 1,
+    numberOfChildren: 0,
+    childrenAges: '',
+    specialRequirements: '',
   });
   const [errors, setErrors] = useState({
     firstName: '',
@@ -35,6 +43,9 @@ const PackageDetailPage = () => {
     phone: '',
     email: '',
     passengers: '',
+    departureDate: '',
+    returnDate: '',
+    originCity: '',
   });
 
   useEffect(() => {
@@ -109,6 +120,11 @@ const PackageDetailPage = () => {
         const n = Number(value || 0);
         return n >= 1 ? '' : 'Al menos 1 pasajero';
       }
+      case 'departureDate':
+      case 'returnDate':
+        return value ? '' : 'Esta fecha es obligatoria';
+      case 'originCity':
+        return value && String(value).trim().length > 0 ? '' : 'Ciudad de origen requerida';
       default:
         return '';
     }
@@ -140,6 +156,13 @@ const PackageDetailPage = () => {
       customer_email: form.email.trim(),
       customer_phone: form.phone.trim(),
       number_of_people: Number(form.passengers),
+      number_of_adults: Number(form.numberOfAdults),
+      number_of_children: Number(form.numberOfChildren),
+      children_ages: form.childrenAges.trim(),
+      departure_date: form.departureDate,
+      return_date: form.returnDate,
+      origin_city: form.originCity.trim(),
+      special_requirements: form.specialRequirements.trim(),
       total_price: totalPrice,
       payment_link: paymentLinkId,
       status: 'ACTIVE',
@@ -381,13 +404,13 @@ const PackageDetailPage = () => {
                     <p className="font-semibold">{pkg.name}</p>
                   </div>
                   <Button
-                    onClick={handleSelectPlan}
+                    onClick={() => navigate(`/booking/${id}`)}
                     className="w-full bg-secondary hover:bg-secondary/90 text-white font-bold text-lg py-6"
                   >
                     Seleccionar Plan
                   </Button>
                   <p className="text-xs text-center text-muted-foreground">
-                    Al hacer clic, te contactaremos para procesar tu reserva
+                    Completa tu información de viaje en el siguiente paso
                   </p>
                 </CardContent>
               </Card>
@@ -397,23 +420,24 @@ const PackageDetailPage = () => {
 
         <Footer />
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-          <SheetContent side="right" className="max-w-md">
-            <SheetHeader>
+          <SheetContent side="right" className="max-w-md flex flex-col p-0">
+            <SheetHeader className="px-6 pt-6">
               <SheetTitle>Reservar — {pkg.destination?.name || pkg.name}</SheetTitle>
             </SheetHeader>
 
-            <div className="space-y-4 py-4">
-              <div>
-                <label className="text-sm text-muted-foreground">Nombre</label>
-                <Input value={form.firstName} onChange={e => handleFormChange('firstName', e.target.value)} placeholder="Nombre" />
-                {errors.firstName && <p className="text-red-600 text-sm mt-1">{errors.firstName}</p>}
-              </div>
+            <ScrollArea className="flex-1 px-6">
+              <div className="space-y-4 py-4 pr-4">
+                <div>
+                  <label className="text-sm text-muted-foreground">Nombre</label>
+                  <Input value={form.firstName} onChange={e => handleFormChange('firstName', e.target.value)} placeholder="Nombre" />
+                  {errors.firstName && <p className="text-red-600 text-sm mt-1">{errors.firstName}</p>}
+                </div>
 
-              <div>
-                <label className="text-sm text-muted-foreground">Apellido</label>
-                <Input value={form.lastName} onChange={e => handleFormChange('lastName', e.target.value)} placeholder="Apellido" />
-                {errors.lastName && <p className="text-red-600 text-sm mt-1">{errors.lastName}</p>}
-              </div>
+                <div>
+                  <label className="text-sm text-muted-foreground">Apellido</label>
+                  <Input value={form.lastName} onChange={e => handleFormChange('lastName', e.target.value)} placeholder="Apellido" />
+                  {errors.lastName && <p className="text-red-600 text-sm mt-1">{errors.lastName}</p>}
+                </div>
 
               <div>
                 <label className="text-sm text-muted-foreground">Teléfono</label>
@@ -440,26 +464,93 @@ const PackageDetailPage = () => {
               </div>
 
               <div>
-                <label className="text-sm text-muted-foreground mb-2 block">Cantidad de personas</label>
-                <div className="inline-flex items-center rounded-md border bg-white">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleFormChange('passengers', Math.max(1, Number(form.passengers) - 1))}
-                    aria-label="Disminuir pasajeros"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </Button>
-                  <div className="px-4 py-2 min-w-[56px] text-center font-semibold">{form.passengers}</div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleFormChange('passengers', Number(form.passengers) + 1)}
-                    aria-label="Aumentar pasajeros"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </Button>
+                <label className="text-sm text-muted-foreground">Ciudad de origen</label>
+                <Input value={form.originCity} onChange={e => handleFormChange('originCity', e.target.value)} placeholder="e.g., Bogotá" />
+                {errors.originCity && <p className="text-red-600 text-sm mt-1">{errors.originCity}</p>}
+              </div>
+
+              <div>
+                <label className="text-sm text-muted-foreground">Fecha de salida</label>
+                <Input
+                  type="date"
+                  value={form.departureDate}
+                  onChange={e => handleFormChange('departureDate', e.target.value)}
+                />
+                {errors.departureDate && <p className="text-red-600 text-sm mt-1">{errors.departureDate}</p>}
+              </div>
+
+              <div>
+                <label className="text-sm text-muted-foreground">Fecha de retorno</label>
+                <Input
+                  type="date"
+                  value={form.returnDate}
+                  onChange={e => handleFormChange('returnDate', e.target.value)}
+                />
+                {errors.returnDate && <p className="text-red-600 text-sm mt-1">{errors.returnDate}</p>}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm text-muted-foreground">Adultos</label>
+                  <div className="inline-flex items-center rounded-md border bg-white w-full">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleFormChange('numberOfAdults', Math.max(0, Number(form.numberOfAdults) - 1))}
+                    >
+                      <Minus className="w-4 h-4" />
+                    </Button>
+                    <div className="flex-1 py-2 text-center font-semibold">{form.numberOfAdults}</div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleFormChange('numberOfAdults', Number(form.numberOfAdults) + 1)}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
+
+                <div>
+                  <label className="text-sm text-muted-foreground">Niños</label>
+                  <div className="inline-flex items-center rounded-md border bg-white w-full">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleFormChange('numberOfChildren', Math.max(0, Number(form.numberOfChildren) - 1))}
+                    >
+                      <Minus className="w-4 h-4" />
+                    </Button>
+                    <div className="flex-1 py-2 text-center font-semibold">{form.numberOfChildren}</div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleFormChange('numberOfChildren', Number(form.numberOfChildren) + 1)}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {Number(form.numberOfChildren) > 0 && (
+                <div>
+                  <label className="text-sm text-muted-foreground">Edades de los niños (separadas por coma)</label>
+                  <Input
+                    value={form.childrenAges}
+                    onChange={e => handleFormChange('childrenAges', e.target.value)}
+                    placeholder="e.g., 5,8,12"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="text-sm text-muted-foreground">Requisitos especiales (opcional)</label>
+                <Input
+                  value={form.specialRequirements}
+                  onChange={e => handleFormChange('specialRequirements', e.target.value)}
+                  placeholder="e.g., Alergia a mariscos, necesita cama de menor..."
+                />
               </div>
 
               <div className="pt-4 border-t">
@@ -472,9 +563,10 @@ const PackageDetailPage = () => {
                   <div className="text-xl font-bold">{formatPrice(totalPrice, pkg.currency)}</div>
                 </div>
               </div>
-            </div>
+              </div>
+            </ScrollArea>
 
-            <SheetFooter>
+            <SheetFooter className="px-6 pb-6 border-t">
               <div className="w-full flex gap-2">
                 <Button variant="outline" className="flex-1" onClick={() => setIsSheetOpen(false)}>Cancelar</Button>
                 {/** disable pay if form invalid or missing required fields */}
@@ -488,7 +580,7 @@ const PackageDetailPage = () => {
                     }
                     handlePay();
                   }}
-                  disabled={isPaying || Object.values(errors).some(Boolean) || !form.firstName || !form.lastName || !form.email}
+                  disabled={isPaying || Object.values(errors).some(Boolean) || !form.firstName || !form.lastName || !form.email || !form.departureDate || !form.returnDate || !form.originCity}
                 >
                   {isPaying ? (
                     <>

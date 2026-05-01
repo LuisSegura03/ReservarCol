@@ -25,64 +25,97 @@ const ReservasManagement = () => {
         </div>
 
         <div className="border rounded-md bg-white">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Contacto</TableHead>
-                <TableHead>Personas</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Estado Pago</TableHead>
-                <TableHead>Estado Reserva</TableHead>
-                <TableHead>Fecha Creación</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {solicitudes.length === 0 ? (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-4 text-muted-foreground">No hay reservas registradas.</TableCell>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>Contacto</TableHead>
+                  <TableHead>Origen</TableHead>
+                  <TableHead>Fechas del viaje</TableHead>
+                  <TableHead>Adultos</TableHead>
+                  <TableHead>Niños</TableHead>
+                  <TableHead>Personas</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead>Estado Pago</TableHead>
+                  <TableHead>Estado Reserva</TableHead>
+                  <TableHead>Fecha Creación</TableHead>
                 </TableRow>
-              ) : (
-                solicitudes.map((s) => (
-                  <TableRow key={s.id}>
-                    <TableCell>
-                      <div className="font-medium">{s.customer_name}</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">{s.customer_email}</div>
-                      <div className="text-xs text-muted-foreground">{s.customer_phone}</div>
-                    </TableCell>
-                    <TableCell>{s.number_of_people}</TableCell>
-                    <TableCell>${s.total_price?.toLocaleString()}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        s.payment_status === 'PAID' ? 'bg-green-100 text-green-800' :
-                        s.payment_status === 'REJECTED' ? 'bg-red-100 text-red-800' :
-                        s.payment_status === 'CANCELLED' ? 'bg-yellow-100 text-yellow-800' :
-                        s.payment_status === 'EXPIRED' ? 'bg-orange-100 text-orange-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {s.payment_status}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <Select value={s.status} onValueChange={(val) => handleStatusChange(s.id, val)}>
-                        <SelectTrigger className="w-32 bg-white text-gray-900">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Pending">Pendiente</SelectItem>
-                          <SelectItem value="Confirmed">Confirmada</SelectItem>
-                          <SelectItem value="Cancelled">Cancelada</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell>{new Date(s.created_at).toLocaleDateString()}</TableCell>
+              </TableHeader>
+              <TableBody>
+                {solicitudes.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={11} className="text-center py-4 text-muted-foreground">No hay reservas registradas.</TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : (
+                  solicitudes.map((s) => (
+                    <TableRow key={s.id}>
+                      <TableCell>
+                        <div className="font-medium">{s.customer_name}</div>
+                        {s.special_requirements && (
+                          <div className="text-xs text-muted-foreground">📝 {s.special_requirements.substring(0, 30)}</div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">{s.customer_email}</div>
+                        <div className="text-xs text-muted-foreground">{s.customer_phone}</div>
+                      </TableCell>
+                      <TableCell className="text-sm">{s.origin_city || '—'}</TableCell>
+                      <TableCell className="text-sm">
+                        {s.departure_date && s.return_date ? (
+                          <div>
+                            <div>{new Date(s.departure_date).toLocaleDateString('es-CO')}</div>
+                            <div className="text-xs text-muted-foreground">→ {new Date(s.return_date).toLocaleDateString('es-CO')}</div>
+                          </div>
+                        ) : (
+                          '—'
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center">{s.number_of_adults || 0}</TableCell>
+                      <TableCell className="text-center">
+                        {s.number_of_children > 0 ? (
+                          <div>
+                            <div>{s.number_of_children}</div>
+                            {s.children_ages && (
+                              <div className="text-xs text-muted-foreground">{s.children_ages}</div>
+                            )}
+                          </div>
+                        ) : (
+                          0
+                        )}
+                      </TableCell>
+                      <TableCell>{s.number_of_people}</TableCell>
+                      <TableCell>${s.total_price?.toLocaleString()}</TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          s.payment_status === 'PAID' ? 'bg-green-100 text-green-800' :
+                          s.payment_status === 'REJECTED' ? 'bg-red-100 text-red-800' :
+                          s.payment_status === 'CANCELLED' ? 'bg-yellow-100 text-yellow-800' :
+                          s.payment_status === 'EXPIRED' ? 'bg-orange-100 text-orange-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {s.payment_status}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Select value={s.status} onValueChange={(val) => handleStatusChange(s.id, val)}>
+                          <SelectTrigger className="w-32 bg-white text-gray-900">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Pending">Pendiente</SelectItem>
+                            <SelectItem value="Confirmed">Confirmada</SelectItem>
+                            <SelectItem value="Cancelled">Cancelada</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>{new Date(s.created_at).toLocaleDateString()}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </div>
     </AdminLayout>
